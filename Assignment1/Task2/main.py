@@ -1,6 +1,9 @@
 import pandas as pd
 from sklearn import linear_model, preprocessing, tree, model_selection
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 import seaborn as sns
 sns.set()
 import datetime
@@ -14,6 +17,8 @@ class Task_Two:
 	test_data = pd.read_csv(test_path)
 
 	titanic = training_data.append(test_data, ignore_index=True)
+
+	passengerId = test_data.PassengerId
 
 	train_idx = len(training_data)
 	test_idx = len(titanic) - len(test_data)
@@ -57,28 +62,59 @@ class Task_Two:
 	titanic['FamilySize'] = titanic.Parch + titanic.SibSp + 1
 	familysize_variables = pd.get_dummies(titanic.FamilySize, prefix="FamilySize")
 
-	#Cabin
-	cabin_values = titanic.Cabin.value_counts()
-	titanic.Cabin = titanic.Cabin.fillna('U')
-	titanic.Cabin = titanic.Cabin.map(lambda x: x[0])
-	cabin_variables = pd.get_dummies(titanic.Cabin, prefix="Cabin")
+	# #Cabin
+	# cabin_values = titanic.Cabin.value_counts()
+	# titanic.Cabin = titanic.Cabin.fillna('U')
+	# titanic.Cabin = titanic.Cabin.map(lambda x: x[0])
+	# cabin_variables = pd.get_dummies(titanic.Cabin, prefix="Cabin")
 
 	#Sex
 	titanic.Sex = titanic.Sex.map({"male": 0, "female":1})
 
-	titanic_d = pd.concat([titanic, cabin_variables, familysize_variables, fare_variables, pclass_variables, embarked_variables, title_variables], axis=1)
+	titanic_d = pd.concat([titanic, familysize_variables, fare_variables, pclass_variables, embarked_variables, title_variables], axis=1)
 
 	titanic_d.drop(['Name', 'Ticket', 'Parch', 'SibSp', 'Age', 'Cabin', 'FamilySize', 'AgeClass', 'Pclass', 'Embarked', 'Fare', 'Title' ], axis=1, inplace=True)
 
 	train = titanic_d[ :train_idx]
 	test =  titanic_d[test_idx: ]
 
-	X = train.drop('Survived', axis=1)
-	y = train.Survived
+	train.Survived = train.Survived.astype(int)
 
-	X_test = test.drop('Survived', axis=1).values
+	X = train.drop('Survived', axis=1).values 
+	y = train.Survived.values
 
-	print(X.head())
+	print(train.head())
+
+	# X_test1 = test.drop('Survived', axis=1).values
+
+	# # create param grid object 
+	# forrest_params = dict(     
+	# 	max_depth = [n for n in range(9, 14)],     
+	# 	min_samples_split = [n for n in range(4, 11)], 
+	# 	min_samples_leaf = [n for n in range(2, 5)],     
+	# 	n_estimators = [n for n in range(10, 60, 10)],
+	# )
+
+	# # instantiate Random Forest model
+	# forrest = RandomForestClassifier()
+
+	# # build and fit model 
+	# forest_cv = GridSearchCV(estimator=forrest, param_grid=forrest_params, cv=5) 
+	# forest_cv.fit(X, y)
+
+	# print("Best score: {}".format(forest_cv.best_score_))
+	# print("Optimal params: {}".format(forest_cv.best_estimator_))
+
+	# forrest_pred = forest_cv.predict(X_test)
+
+	# # dataframe with predictions
+	# kaggle = pd.DataFrame({'PassengerId': passengerId, 'Survived': forrest_pred})
+	# # save to csv
+	# kaggle.to_csv('./Data/titanic_pred.csv', index=False)
+
+
+
+	# print(X.head())
 
 	# def explore(self):
 		# print(self.training_data.describe(include='all'))
