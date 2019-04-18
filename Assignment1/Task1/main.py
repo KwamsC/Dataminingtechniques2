@@ -1,43 +1,36 @@
 import datetime
+from utils import Utils
+from visualize import Visualize
 import pandas as pd
-import matplotlib.pyplot as plt
-
-pd.set_option('display.max_rows', None)
-# pd.set_option('display.max_columns', None)  
-# pd.set_option('display.expand_frame_repr', False)
-# pd.set_option('max_colwidth', -1)
 
 class Assignment:
+
 	path = 'dataset.csv'
 	data = pd.read_csv(path, sep=';', header=0, engine='python')
 
-	ja_map = {'ja':1, 'nee':0, 'unknown':2}
-	yes_map = {'yes':1, 'no':0, 'unknown':2}
-	mu_map = {'mu':1, 'sigma':0, 'unknown':2}
-	gender_mapping = {'male':1, 'female':0, 'unknown':2}
+	def __init__(self):
+		self.explore()
+		self.normalize_data(self.data)
 
+	def normalize_data(self, data):
+		u = Utils()
 
-	data = data.drop(['Timestamp', data.columns[-1]], axis=1)
-	# print(data.head())
+		# Drop timestamp as they are almost identical across the dataset
+		data = data.drop(['Timestamp', data.columns[-1]], axis=1)
+		# data = u.map_option_questions(data)
+		# data = u.chocolate_map(data)
+		# data = u.date_conversion(data)
+		# data = u.neighbour_conversion(data)
+		# print(data[data.columns[10]])
 
-	data[data.columns[4]] = data[data.columns[4]].map(ja_map)
-	data[data.columns[3]] = data[data.columns[3]].map(mu_map)
-	data[data.columns[1]] = data[data.columns[1]].map(yes_map)
-	data[data.columns[5]] = data[data.columns[5]].map(gender_mapping)
-
-	# print(data[data.columns[4]])
-
-	print(data[data.columns[13]].str.lower().value_counts())
-
-	# def __init__(self):
-		# features = ['What programme are you in?', 'Have you taken a course on machine learning?']
-		# print(self.data['What programme are you in?'].value_counts())
-
-	def process_study_programme(self):
-		studies = ['Computer Science', 'Artificial Intelligence', 'Business Analytics', 'Econometrics', 'Bioinformatics and Systems Biology', 'Computational Science', 'Finance', 'Other']
-		for element in self.data['What programme are you in?']:
-			print(element)
+	def explore(self):
+		print(self.data.shape)
+		print(self.data.count())
 
 if __name__ == '__main__':
-	a = Assignment()
-	# a.process_study_programme()
+	pd.set_option('display.max_rows', None)
+	# pd.set_option('display.max_columns', None)  
+	# pd.set_option('display.expand_frame_repr', False)
+	# pd.set_option('max_colwidth', -1)
+
+	a = Assignment()	
