@@ -8,8 +8,11 @@ class Assignment:
 	path = 'dataset.csv'
 	data = pd.read_csv(path, sep=';', header=0, engine='python')
 
+	# converted_csv_path = 'new.csv'
+	# converted_data = pd.read_csv(path, sep=',', header=0, engine='python')
+
 	def __init__(self):
-		self.explore()
+		# self.explore()
 		self.normalize_data(self.data)
 
 	def normalize_data(self, data):
@@ -17,11 +20,19 @@ class Assignment:
 
 		# Drop timestamp as they are almost identical across the dataset
 		data = data.drop(['Timestamp', data.columns[-1]], axis=1)
+		# data = u.programme_conversion(data, 0)
 		# data = u.map_option_questions(data)
 		# data = u.chocolate_map(data)
 		# data = u.date_conversion(data)
 		# data = u.neighbour_conversion(data)
-		# print(data[data.columns[10]])
+		# data = u.competition_conversion(data, 10)
+		# data = u.random_number_conversion(data, 11)
+		# data = u.bed_time_conversion(data, 12)
+		# data = u.good_day_conversion(data, 13)
+		# data = u.good_day_conversion(data, 14)
+
+		# print(data[data.columns[13]])
+		# data.to_csv('./new.csv')
 
 	def explore(self):
 		print(self.data.shape)
