@@ -3,6 +3,9 @@ from sklearn import linear_model, preprocessing, tree, model_selection
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+from sklearn import tree
 from sklearn.model_selection import GridSearchCV
 import seaborn as sns
 sns.set()
@@ -17,6 +20,8 @@ class Task_Two:
 	test_data = pd.read_csv(test_path)
 
 	titanic = training_data.append(test_data, ignore_index=True)
+
+	# print(titanic.info())
 
 	passengerId = test_data.PassengerId
 
@@ -62,18 +67,12 @@ class Task_Two:
 	titanic['FamilySize'] = titanic.Parch + titanic.SibSp + 1
 	familysize_variables = pd.get_dummies(titanic.FamilySize, prefix="FamilySize")
 
-	# #Cabin
-	# cabin_values = titanic.Cabin.value_counts()
-	# titanic.Cabin = titanic.Cabin.fillna('U')
-	# titanic.Cabin = titanic.Cabin.map(lambda x: x[0])
-	# cabin_variables = pd.get_dummies(titanic.Cabin, prefix="Cabin")
-
 	#Sex
 	titanic.Sex = titanic.Sex.map({"male": 0, "female":1})
 
 	titanic_d = pd.concat([titanic, familysize_variables, fare_variables, pclass_variables, embarked_variables, title_variables], axis=1)
 
-	titanic_d.drop(['Name', 'Ticket', 'Parch', 'SibSp', 'Age', 'Cabin', 'FamilySize', 'AgeClass', 'Pclass', 'Embarked', 'Fare', 'Title' ], axis=1, inplace=True)
+	titanic_d.drop(['Name','PassengerId', 'Ticket', 'Parch', 'SibSp', 'Age', 'Cabin', 'FamilySize', 'AgeClass', 'Pclass', 'Embarked', 'Fare', 'Title' ], axis=1, inplace=True)
 
 	train = titanic_d[ :train_idx]
 	test =  titanic_d[test_idx: ]
@@ -83,187 +82,38 @@ class Task_Two:
 	X = train.drop('Survived', axis=1).values 
 	y = train.Survived.values
 
-	print(train.head())
+	# print(train.head())
 
-	# X_test1 = test.drop('Survived', axis=1).values
+	X_test = test.drop('Survived', axis=1).values
 
-	# # create param grid object 
-	# forrest_params = dict(     
-	# 	max_depth = [n for n in range(9, 14)],     
-	# 	min_samples_split = [n for n in range(4, 11)], 
-	# 	min_samples_leaf = [n for n in range(2, 5)],     
-	# 	n_estimators = [n for n in range(10, 60, 10)],
-	# )
+	# create param grid object 
+	forrest_params = dict(     
+		max_depth = [n for n in range(5, 14)],    
+		min_samples_split = [n for n in range(7, 13)],
+		min_samples_leaf = [n for n in range(3, 5)],  
+		criterion = ['entropy', 'gini'], 
+		n_estimators = [n for n in range(10, 60, 5)],
+		# max_depth = [9],     
+		# min_samples_split = [5], 
+		# min_samples_leaf = [4],     
+		# n_estimators = [10],
+	)
+	#Modelaka
+	model = tree.DecisionTreeClassifier(random_state=1)
+	model = model.fit(X, y)
+	
+	decision_tree_pred = model.predict(X_test)
 
-	# # instantiate Random Forest model
-	# forrest = RandomForestClassifier()
-
-	# # build and fit model 
-	# forest_cv = GridSearchCV(estimator=forrest, param_grid=forrest_params, cv=5) 
-	# forest_cv.fit(X, y)
-
-	# print("Best score: {}".format(forest_cv.best_score_))
-	# print("Optimal params: {}".format(forest_cv.best_estimator_))
-
-	# forrest_pred = forest_cv.predict(X_test)
-
-	# # dataframe with predictions
-	# kaggle = pd.DataFrame({'PassengerId': passengerId, 'Survived': forrest_pred})
-	# # save to csv
-	# kaggle.to_csv('./Data/titanic_pred.csv', index=False)
+	dotfile = open("./img/dtree2.dot", 'w')
+	tree.export_graphviz(model, out_file = dotfile, feature_names = train.drop('Survived', axis=1).columns)
+	dotfile.close() 
 
 
-
-	# print(X.head())
-
-	# def explore(self):
-		# print(self.training_data.describe(include='all'))
-		# print(self.training_data.head(100))
-		# print(self.test_data.describe(include='all'))
-		# print(self.test_data.head(100))
-
-
-
-	# training_test_data = [training_data, test_data]
-
-
-	# print(training_data.info())
-
-	# def __init__(self):
-	# 	df = self.normalize_data(self.training_data)
-
-	# 	target = df["Survived"].values
-	# 	feature_names = ["Pclass", "Age", "Sex", "Fare", "Embarked", "SibSp", "Parch"]
-	# 	features = df[feature_names].values
-
-	# 	generalized_tree = tree.DecisionTreeClassifier(
-	# 		random_state=1,
-	# 		max_depth = 7,
-	# 		min_samples_split = 2
-	# 	)
-		# generalized_tree_ = generalized_tree.fit(features, target)
-		# tree.export_graphviz(generalized_tree_, feature_names=feature_names, out_file="tree.dot")
-		# print(decision_tree_.score(features, target))
-
-		# scores = model_selection.cross_val_score(generalized_tree, features, target, scoring='accuracy', cv=50)
-		# print(scores)
-		# print(scores.mean())
-	# 	print(self.training_data.shape) 
-	# 	print(self.training_data.count())
-
-	# def visualize(self):
-	# 	fig = plt.figure(figsize=(18,6))
 		
-	# 	plt.subplot2grid((2,3), (0,0))
-	# 	self.training_data.Survived.value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Survived")
-
-	# 	plt.subplot2grid((2,3), (0,1))
-	# 	plt.scatter(self.training_data.Survived, self.training_data.Age, alpha=0.1)
-	# 	plt.title("Age wrt Survived")
-
-	# 	plt.subplot2grid((2,3), (0,2))
-	# 	self.training_data.Pclass.value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Class")
-
-	# 	plt.subplot2grid((2,3), (1,0), colspan=2)
-	# 	for x in [1,2,3]:
-	# 		self.training_data.Age[self.training_data.Pclass == x].plot(kind="kde")
-	# 	plt.title("Class wrt Age")
-	# 	plt.legend(("1st class", "2nd class", "3rd class"))
-
-	# 	plt.subplot2grid((2,3), (1,2))
-	# 	self.training_data.Embarked.value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Embarked")
-
-	# 	plt.show()
-
-	# def visualize_gender(self):
-	# 	f_color = "#000000"
-	# 	fig = plt.figure(figsize=(18,6))
-		
-	# 	plt.subplot2grid((3,4), (0,0))
-	# 	self.training_data.Survived.value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Survived")
-
-	# 	plt.subplot2grid((3,4), (0,1))
-	# 	self.training_data.Survived[self.training_data.Sex == "male"].value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Men survived")
-
-	# 	plt.subplot2grid((3,4), (0,2))
-	# 	self.training_data.Survived[self.training_data.Sex == "female"].value_counts(normalize=True).plot(kind="bar", alpha=0.5, color=f_color)
-	# 	plt.title("Women Survived")
-
-	# 	plt.subplot2grid((3,4), (0,3))
-	# 	self.training_data.Sex[self.training_data.Survived == 1].value_counts(normalize=True).plot(kind="bar", alpha=0.5, color=[f_color, 'b'])
-	# 	plt.title("Sex of survived")
-
-	# 	plt.subplot2grid((3,4), (1,0), colspan=4)
-	# 	for x in [1, 2, 3]:
-	# 		self.training_data.Survived[self.training_data.Pclass == x].plot(kind="kde")
-	# 	plt.title("Class wrt Survived")
-	# 	plt.legend(("1st", "2nd", "3rd"))
-
-	# 	plt.subplot2grid((3,4), (2,0))
-	# 	self.training_data.Survived[(self.training_data.Sex == "male") & (self.training_data.Pclass == 1)].value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Rich man Survived")
-
-	# 	plt.subplot2grid((3,4), (2,1))
-	# 	self.training_data.Survived[(self.training_data.Sex == "male") & (self.training_data.Pclass == 3)].value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Poor man survived")
-
-	# 	plt.subplot2grid((3,4), (2,2))
-	# 	self.training_data.Survived[(self.training_data.Sex == "female") & (self.training_data.Pclass == 1)].value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Rich women Survived")
-
-	# 	plt.subplot2grid((3,4), (2,3))
-	# 	self.training_data.Survived[(self.training_data.Sex == "female") & (self.training_data.Pclass == 3)].value_counts(normalize=True).plot(kind="bar", alpha=0.5)
-	# 	plt.title("Poor women survived")
-
-	# 	plt.show()
-
-	# def hypothesis(self):
-	# 	train = self.training_data.copy()
-	# 	train["Hyp"] = 0
-	# 	train.loc[train.Sex == "female", "Hyp"] = 1
-
-	# 	train["Result"] = 0
-	# 	train.loc[train.Survived == train["Hyp"], "Result"] = 1
-
-	# 	print(train["Result"].value_counts(normalize=True))
-
-	# def normalize_data(self, d):
-	# 	data = d.copy()
-
-	# 	data["Fare"] = data["Fare"].fillna(data["Fare"].dropna().median())
-	# 	data["Age"] = data["Age"].fillna(data["Age"].dropna().median())
-
-	# 	data.loc[data["Sex"] == "male", "Sex"] = 0
-	# 	data.loc[data["Sex"] == "female", "Sex"] = 1
-
-	# 	data["Embarked"] = data["Embarked"].fillna("S")
-	# 	data.loc[data["Embarked"] == "S", "Embarked"] = 0
-	# 	data.loc[data["Embarked"] == "C", "Embarked"] = 1
-	# 	data.loc[data["Embarked"] == "Q", "Embarked"] = 2
-
-	# 	return data
-
-	# def linear_process(self):
-	# 	df = self.normalize_data(self.training_data)
-	# 	target = df["Survived"].values
-	# 	feature_names = ["Pclass", "Age", "Sex", "Fare", "Embarked", "SibSp", "Parch"]
-	# 	features = df[feature_names].values
-
-	# 	classifier = linear_model.LogisticRegression()
-	# 	classifier_ = classifier.fit(features, target)
-
-	# 	print(classifier_.score(features, target))
-
-	# 	poly = preprocessing.PolynomialFeatures(degree=2)
-	# 	poly_features = poly.fit_transform(features)
-
-	# 	classifier_ = classifier.fit(poly_features, target)
-	# 	print(classifier_.score(poly_features, target))
+	kaggle = pd.DataFrame({'PassengerId': passengerId, 'Survived': decision_tree_pred})
+	# kaggle = round(kaggle)
+	kaggle.Survived = kaggle.Survived.astype(int)
+	kaggle.to_csv('./pred_procedure_two.csv', index=False)
 
 if __name__ == '__main__':
 	a = Task_Two()

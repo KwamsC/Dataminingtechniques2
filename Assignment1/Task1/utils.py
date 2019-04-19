@@ -289,6 +289,27 @@ class Utils:
 		data[data.columns[column]] = data[data.columns[column]].map(mapping)
 		return data
 
+	def stress_conversion(self, data, column):
+		data[data.columns[column]] = data[data.columns[column]].str.lower()
+		data[data.columns[column]] = data[data.columns[column]].str.strip()
+		data[data.columns[column]] = data[data.columns[column]].str.replace(',','.')
+		data[data.columns[column]] = data[data.columns[column]].replace('[^a-zA-Z0-9- ]', '', regex=True)
+		data[data.columns[column]] = data[data.columns[column]].str.replace('epsilon', '100')
+		data[data.columns[column]] = data[data.columns[column]].str.replace('x', '0')
+		data[data.columns[column]] = data[data.columns[column]].str.replace('over ', '100')
+		data[data.columns[column]] = data[data.columns[column]].str.replace('ten', '10')
+		data[data.columns[column]] = data[data.columns[column]].str.replace('low', '20')
+		data[data.columns[column]] = data[data.columns[column]].fillna(0)
+		data[data.columns[column]] = data[data.columns[column]].astype(int)
+
+		data[data.columns[column]] = data[data.columns[column]].map(lambda x: 
+			0 if x < 20 else (
+				1 if x>=20 and x<40 else (
+					2 if x >=40 and x <60 else (
+						3 if x >=60 and x <80 else 4))))
+
+		return data
+
 	def compile_with_value(self, data, r, column, length_string, value, insert_at):
 		for i in range(len(data)):
 			element = data[data.columns[column]][i]
