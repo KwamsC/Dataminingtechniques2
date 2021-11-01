@@ -104,9 +104,9 @@ class Task_Two:
 	
 	decision_tree_pred = model.predict(X_test)
 
-	dotfile = open("./img/dtree2.dot", 'w')
-	tree.export_graphviz(model, out_file = dotfile, feature_names = train.drop('Survived', axis=1).columns)
-	dotfile.close() 
+	# dotfile = open("./img/dtree2.dot", 'w')
+	# tree.export_graphviz(model, out_file = dotfile, feature_names = train.drop('Survived', axis=1).columns)
+	# dotfile.close() 
 
 
 		
